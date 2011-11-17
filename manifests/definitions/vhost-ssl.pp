@@ -305,7 +305,7 @@ define apache::vhost-ssl (
     #  seltype => "httpd_sys_content_t",
      # require => Exec["generate-ssl-cert-$name"],
     #}
-    notify ($publish_csr)
+    notify {"publish csr = ${publish_csr}":}
     #apache::csr_file{ $name :
     #  publish_csr => $publish_csr,
     #  csrfile => $csrfile,
