@@ -17,7 +17,6 @@ define apache::csr_file (
           source  => "file://$csrfile",
           mode    => 640,
           seltype => "httpd_sys_content_t",
-          require => Exec["generate-ssl-cert-$name"],
         }
         
   }
