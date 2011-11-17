@@ -303,7 +303,7 @@ define apache::vhost-ssl (
       source  => "file://$csrfile",
       mode    => 640,
       seltype => "httpd_sys_content_t",
-      require => Exec["generate-ssl-cert-$name"],
+      require => [Exec["generate-ssl-cert-$name"],[Apache::Vhost[$name]]],
     }
 
   }
