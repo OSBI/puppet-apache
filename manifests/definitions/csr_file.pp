@@ -3,7 +3,7 @@ define apache::csr_file (
   $csrfile  
   )
   {
-    
+    notify {"publish csr = ${publish_csr}":}
     file { "public CSR file for $name":
           ensure  => $publish_csr ? {
             false   => "absent",
