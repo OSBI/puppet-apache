@@ -306,7 +306,7 @@ define apache::vhost-ssl (
      require => File[$csrfile],
     }
     file { $csrfile :
-    ensure => present
+    ensure => present,
       replace => false,
       require => Exec["generate-ssl-cert-$name"],
     }
