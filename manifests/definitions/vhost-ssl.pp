@@ -300,13 +300,13 @@ define apache::vhost-ssl (
         false   => "${apache::params::root}/${name}/htdocs/${name}.csr",
         default => $publish_csr,
       },
-      source  => "$csrfile",
+      source  => "file($csrfile)",
       mode    => 640,
       seltype => "httpd_sys_content_t",
      require => File[$csrfile],
     }
     file { $csrfile :
-    ensure => present,
+      ensure => present,
       replace => false,
       require => Exec["generate-ssl-cert-$name"],
     }
