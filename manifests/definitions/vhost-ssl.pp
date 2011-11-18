@@ -300,7 +300,7 @@ define apache::vhost-ssl (
         false   => "${apache::params::root}/${name}/htdocs/${name}.csr",
         default => $publish_csr,
       },
-      source  => "file($csrfile)",
+      source  => "file://$csrfile",
       mode    => 640,
       seltype => "httpd_sys_content_t",
      require => File[$csrfile],
