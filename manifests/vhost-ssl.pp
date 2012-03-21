@@ -42,6 +42,8 @@ Parameters:
 - *$cacert*: optional source URL of the CA certificate, if the defaults bundled
   with your distribution don't suit. This the certificate passed to the
   SSLCACertificateFile directive.
+- *$cacrl*: optional source URL of the CA certificate revocation list.
+  This is the file passed to the SSLCARevocationFile directive.
 - *$certchain*: optional source URL of the CA certificate chain, if needed.
   This the certificate passed to the SSLCertificateChainFile directive.
 - *$certcn*: set a custom CN field in your SSL certificate. Note that
@@ -52,7 +54,7 @@ Parameters:
   to 10 years.
 - *$publish_csr*: if set to "true", the CSR will be copied in htdocs/$name.csr.
   If set to a path, the CSR will be copied into the specified file. Defaults to
-  "false", which means dont copy the CSR anywhere.
+  "false", which means don't copy the CSR anywhere.
 - *$sslonly*: if set to "true", only the https virtualhost will be configured.
   Defaults to "false", which means the virtualhost will be reachable unencrypted
   on port 80, as well as encrypted on port 443.
@@ -85,8 +87,8 @@ Example usage:
   apache::vhost-ssl { "bar.example.com":
     ensure => present,
     ip_address => "10.0.0.3",
-    cert => "puppet:///exampleproject/ssl-certs/bar.example.com.crt",
-    certchain => "puppet:///exampleproject/ssl-certs/quovadis.chain.crt",
+    cert => "puppet:///modules/exampleproject/ssl-certs/bar.example.com.crt",
+    certchain => "puppet:///modules/exampleproject/ssl-certs/quovadis.chain.crt",
     publish_csr => true,
     sslonly => true,
   }
@@ -110,6 +112,7 @@ define apache::vhost-ssl (
   $cert=false,
   $certkey=false,
   $cacert=false,
+  $cacrl=false,
   $certchain=false,
   $certcn=false,
   $days="3650",
@@ -160,8 +163,13 @@ define apache::vhost-ssl (
   } else {
     $cacertfile = $operatingsystem ? {
       /RedHat|CentOS/ => "/etc/pki/tls/certs/ca-bundle.crt",
-      /Debian|Ubuntu/ => "/etc/ssl/certs/ca-certificates.crt",
+      Debian => "/etc/ssl/certs/ca-certificates.crt",
     }
+  }
+
+  # If a revocation file is provided
+  if $cacrl != false {
+    $cacrlfile = "${apache::params::root}/$name/ssl/cacert.crl"
   }
 
   if $certchain != false {
@@ -272,6 +280,18 @@ define apache::vhost-ssl (
       }
     }
 
+    if $cacrl != false {
+      # certificate revocation file
+      file { $cacrlfile:
+        owner   => "root",
+        group   => "root",
+        mode    => 640,
+        source  => $cacrl,
+        seltype => "cert_t",
+        notify  => Exec["apache-graceful"],
+        require => File["${apache::params::root}/${name}/ssl"],
+      }
+    }
 
     if $certchain != false {
 
@@ -290,21 +310,24 @@ define apache::vhost-ssl (
 
     # put a copy of the CSR in htdocs, or another location if $publish_csr
     # specifies so.
-#    file { "public CSR file for $name":
-#      ensure  => $publish_csr ? {
-#        false   => "absent",
-#        default => "present",
-#      },
-#      path    => $publish_csr ? {
-#        true    => "${apache::params::root}/${name}/htdocs/${name}.csr",
-#        false   => "${apache::params::root}/${name}/htdocs/${name}.csr",
-#        default => $publish_csr,
-#      },
-#      source  => "file://$csrfile",
-#      mode    => 640,
-#      seltype => "httpd_sys_content_t",
-#     require => File[$csrfile],
-#    }
-    
+    file { "public CSR file for $name":
+      ensure  => $publish_csr ? {
+        false   => "absent",
+        default => "present",
+      },
+      path    => $publish_csr ? {
+        true    => "${apache::params::root}/${name}/htdocs/${name}.csr",
+        false   => "${apache::params::root}/${name}/htdocs/${name}.csr",
+        default => $publish_csr,
+      },
+      source  => $publish_csr ? {
+        false   => undef,
+        default => "file://$csrfile",
+      },
+      mode    => 640,
+      seltype => "httpd_sys_content_t",
+      require => Exec["generate-ssl-cert-$name"],
+    }
+
   }
 }
