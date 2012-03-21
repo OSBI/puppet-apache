@@ -8,7 +8,7 @@
   "summary": "",
   "version": "1.0",
   "checksums": {
-    "Modulefile": "fa5f11585f7d7e4a1462d693a91ae6db",
+    "Modulefile": "8542adc86781bbfb0a673510c760b199",
     "README": "9662c61a24fdd83838f4bf7ea72512ae",
     "files/README_userdir": "8cdfc289fe01dd81f983944279c5f34a",
     "files/awstats.deb.conf": "a14652a87c530a20fa660aebeea71c2d",
@@ -155,6 +155,7 @@
     "manifests/classes/mod_proxy.pp": "1ab61ffab00b466f33f4bd1517f6e9a0",
     "manifests/collectd.pp": "37f46892e99b30af94dbb2d8a2f18276",
     "manifests/debian.pp": "4bb5f5497dca5e3abc7f419bae8eb743",
+    "manifests/definitions/csr_file.pp": "3401d2888aeec4d0cab623ef62de800b",
     "manifests/deflate.pp": "65d0ee4a7a887220a87d0ea5df5e3f70",
     "manifests/dev.pp": "674555fe31abad806eeec954e7ce567e",
     "manifests/directive.pp": "a6ee6b2bab4f616299f5f2ac864e0977",
@@ -206,5 +207,14 @@
     "templates/webdav-svn.erb": "dbdc731da17720e1017c4cac162c9192",
     "tests/init.pp": "374db55b14cb070fe2928c4713213aed"
   },
-  "dependencies": []
+  "dependencies": [
+    {
+      "name": "Analytical Labs/sudo",
+      "versionRequirement": "\u003d\u003d1.0"
+    },
+    {
+      "name": "Analytical Labs/common",
+      "versionRequirement": "\u003d\u003d1.0"
+    }
+  ]
 }
