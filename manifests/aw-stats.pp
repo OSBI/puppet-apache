@@ -1,4 +1,4 @@
-define apache::aw-stats($ensure=present) {
+define apache::aw-stats($ensure=present, $aliases=[]) {
 
   include apache::params
 
@@ -16,8 +16,8 @@ define apache::aw-stats($ensure=present) {
     owner   => root,
     group   => root,
     source  => $operatingsystem ? {
-      /RedHat|CentOS/ => "puppet:///apache/awstats.rh.conf",
-      /Debian|Ubuntu/ => "puppet:///apache/awstats.deb.conf",
+      /RedHat|CentOS/ => "puppet:///modules/apache/awstats.rh.conf",
+      /Debian|Ubuntu/ => "puppet:///modules/apache/awstats.deb.conf",
     },
     seltype => $operatingsystem ? {
       "RedHat" => "httpd_config_t",

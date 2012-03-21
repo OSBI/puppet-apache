@@ -12,14 +12,19 @@ class apache::redhat inherits apache::base {
     require => [File["/usr/local/sbin/a2ensite"], File["/usr/local/sbin/a2dissite"], File["/usr/local/sbin/a2enmod"], File["/usr/local/sbin/a2dismod"]],
   }
 
+  # $httpd_pid_file is used in template logrotate-httpd.erb
+  $httpd_pid_file = $lsbmajdistrelease ? {
+    /4|5/   => "/var/run/httpd.pid",
+    default => "/var/run/httpd/httpd.pid",
+  }
   File["logrotate configuration"] { 
-    path => "/etc/logrotate.d/httpd",
-    source => "puppet:///apache/etc/logrotate.d/httpd",
+    path    => "/etc/logrotate.d/httpd",
+    content => template("apache/logrotate-httpd.erb"),
   }
 
   File["default status module configuration"] {
     path => "${apache::params::conf}/conf.d/status.conf",
-    source => "puppet:///apache/etc/httpd/conf/status.conf",
+    source => "puppet:///modules/apache/etc/httpd/conf/status.conf",
   }
 
   File["default virtualhost"] { 
@@ -32,7 +37,20 @@ class apache::redhat inherits apache::base {
     mode => 755,
     owner => "root",
     group => "root",
-    source => "puppet:///apache/usr/local/sbin/a2X.redhat",
+    source => "puppet:///modules/apache/usr/local/sbin/a2X.redhat",
+  }
+
+  $httpd_mpm = $apache_mpm_type ? {
+    ''         => 'httpd', # default MPM
+    'pre-fork' => 'httpd',
+    'prefork'  => 'httpd',
+    default    => "httpd.${apache_mpm_type}",
+  }
+
+  augeas { "select httpd mpm ${httpd_mpm}":
+    changes => "set /files/etc/sysconfig/httpd/HTTPD /usr/sbin/${httpd_mpm}",
+    require => Package["apache"],
+    notify  => Service["apache"],
   }
 
   file { [
@@ -62,8 +80,8 @@ class apache::redhat inherits apache::base {
   file { "${apache::params::conf}/mods-available":
     ensure => directory,
     source => $lsbmajdistrelease ? {
-      5 => "puppet:///apache//etc/httpd/mods-available/redhat5/",
-      6 => "puppet:///apache//etc/httpd/mods-available/redhat6/",
+      5 => "puppet:///modules/apache/etc/httpd/mods-available/redhat5/",
+      6 => "puppet:///modules/apache/etc/httpd/mods-available/redhat6/",
     },
     recurse => true,
     mode => 644,
