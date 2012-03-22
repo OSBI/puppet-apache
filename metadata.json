@@ -176,7 +176,7 @@
     "manifests/svnserver.pp": "424624278343631e44c8cf1b7e74b022",
     "manifests/userdir.pp": "df3c2c3291d91ad469f62a24d55039ee",
     "manifests/userdirinstance.pp": "a6e55b903b9528b399edd68a12d1e881",
-    "manifests/vhost-ssl.pp": "50a2e878a625aa35b1d369455d677b16",
+    "manifests/vhost-ssl.pp": "c7272b59de0f23267a846b462fabb63e",
     "manifests/vhost.pp": "0efbc3155a90e7f30c996d5017b35b70",
     "manifests/webdav/base.pp": "a5ede30c743513da775bef34ce154395",
     "manifests/webdav/instance.pp": "f9ed07c68e27d46e323271f2cef296c8",
