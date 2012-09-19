@@ -210,11 +210,11 @@
   "dependencies": [
     {
       "name": "Analytical Labs/sudo",
-      "versionRequirement": "\u003d\u003d1.0"
+      "version_requirement": "\u003d\u003d1.0"
     },
     {
       "name": "Analytical Labs/common",
-      "versionRequirement": "\u003d\u003d1.0"
+      "version_requirement": "\u003d\u003d1.0"
     }
   ]
 }

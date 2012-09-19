@@ -1,6 +1,6 @@
 define apache::auth::basic::ldap (
   $ensure="present", 
-  $authname="Private Area",
+  $authname=false,
   $vhost,
   $location="/",
   $authLDAPUrl,
@@ -28,10 +28,16 @@ define apache::auth::basic::ldap (
     apache::module {"authnz_ldap": }
   }
 
+  if $authname {
+    $_authname = $authname
+  } else {
+    $_authname = $name
+  }
+
   file { "${apache::params::root}/${vhost}/conf/auth-basic-ldap-${fname}.conf":
     ensure => $ensure,
     content => template("apache/auth-basic-ldap.erb"),
-    seltype => $operatingsystem ? {
+    seltype => $::operatingsystem ? {
       "RedHat" => "httpd_config_t",
       "CentOS" => "httpd_config_t",
       default  => undef,

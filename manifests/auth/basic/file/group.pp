@@ -1,6 +1,6 @@
 define apache::auth::basic::file::group (
   $ensure="present", 
-  $authname="Private Area",
+  $authname=false,
   $vhost,
   $location="/",
   $authUserFile=false,
@@ -27,10 +27,16 @@ define apache::auth::basic::file::group (
     $_authGroupFile = "${apache::params::root}/${vhost}/private/htgroup"
   }
 
+  if $authname {
+    $_authname = $authname
+  } else {
+    $_authname = $name
+  }
+
   file { "${apache::params::root}/${vhost}/conf/auth-basic-file-group-${fname}.conf":
     ensure => $ensure,
     content => template("apache/auth-basic-file-group.erb"),
-    seltype => $operatingsystem ? {
+    seltype => $::operatingsystem ? {
       "RedHat" => "httpd_config_t",
       "CentOS" => "httpd_config_t",
       default  => undef,

@@ -10,14 +10,28 @@ It shouldn't be necessary to directly include this class.
 class apache::base {
 
   include apache::params
+  include concat::setup
 
   $access_log = $apache::params::access_log
   $error_log  = $apache::params::error_log
 
+  concat {"${apache::params::conf}/ports.conf":
+    notify  => Service['apache'],
+    require => Package['apache'],
+  }
+
+  # removed this folder originally created by common::concatfilepart
+  file {"${apache::params::conf}/ports.conf.d":
+    ensure  => absent,
+    purge   => true,
+    recurse => true,
+    force   => true,
+  }
+
   file {"root directory":
     path => $apache::params::root,
     ensure => directory,
-    mode => 755,
+    mode => '0755',
     owner => "root",
     group => "root",
     require => Package["apache"],
@@ -26,7 +40,7 @@ class apache::base {
   file {"log directory":
     path => $apache::params::log,
     ensure => directory,
-    mode => 755,
+    mode => '0755',
     owner => "root",
     group  => "root",
     require => Package["apache"],
@@ -63,7 +77,7 @@ class apache::base {
     ensure => present,
     owner => root,
     group => root,
-    mode => 644,
+    mode => '0644',
     source => undef,
     require => Package["apache"],
   }
@@ -87,12 +101,34 @@ class apache::base {
   }
 
   file {"default virtualhost":
-    path    => "${apache::params::conf}/sites-available/default",
+    path    => "${apache::params::conf}/sites-available/default-vhost",
     ensure  => present,
     content => template("apache/default-vhost.erb"),
     require => Package["apache"],
     notify  => Exec["apache-graceful"],
-    mode    => 644,
+    before  => File["${apache::params::conf}/sites-enabled/000-default-vhost"],
+    mode    => '0644',
+  }
+
+  if $apache_disable_default_vhost {
+
+    file { "${apache::params::conf}/sites-enabled/000-default-vhost":
+      ensure => absent,
+      notify => Exec['apache-graceful'],
+    }
+
+  } else {
+
+    file { "${apache::params::conf}/sites-enabled/000-default-vhost":
+      ensure => link,
+      target => "${apache::params::conf}/sites-available/default-vhost",
+      notify => Exec['apache-graceful'],
+    }
+
+    file { "${apache::params::root}/html": 
+      ensure  => directory,
+    }
+
   }
 
   exec { "apache-graceful":
@@ -105,8 +141,15 @@ class apache::base {
     ensure => present,
     owner => root,
     group => root,
-    mode => 755,
+    mode => '0755',
     source => "puppet:///modules/apache/usr/local/bin/htgroup",
+  }
+
+  file { ["${apache::params::conf}/sites-enabled/default",
+          "${apache::params::conf}/sites-enabled/000-default",
+          "${apache::params::conf}/sites-enabled/default-ssl"]:
+    ensure => absent,
+    notify => Exec["apache-graceful"],
   }
 
 }

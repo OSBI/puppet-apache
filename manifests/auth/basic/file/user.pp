@@ -1,6 +1,6 @@
 define apache::auth::basic::file::user (
   $ensure="present", 
-  $authname="Private Area",
+  $authname=false,
   $vhost,
   $location="/",
   $authUserFile=false,
@@ -20,6 +20,12 @@ define apache::auth::basic::file::user (
     $_authUserFile = "${apache::params::root}/${vhost}/private/htpasswd"
   }
 
+  if $authname {
+    $_authname = $authname
+  } else {
+    $_authname = $name
+  }
+
   if $users != "valid-user" {
     $_users = "user $users"
   } else {
@@ -29,7 +35,7 @@ define apache::auth::basic::file::user (
   file {"${apache::params::root}/${vhost}/conf/auth-basic-file-user-${fname}.conf":
     ensure => $ensure,
     content => template("apache/auth-basic-file-user.erb"),
-    seltype => $operatingsystem ? {
+    seltype => $::operatingsystem ? {
       "RedHat" => "httpd_config_t",
       "CentOS" => "httpd_config_t",
       default  => undef,

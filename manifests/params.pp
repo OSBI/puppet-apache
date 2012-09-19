@@ -1,39 +1,52 @@
 class apache::params {
 
-  $pkg = $operatingsystem ? {
+  $pkg = $::operatingsystem ? {
     /RedHat|CentOS/ => 'httpd',
     /Debian|Ubuntu/ => 'apache2',
   }
 
   $root = $apache_root ? {
-    "" => $operatingsystem ? {
+    "" => $::operatingsystem ? {
       /RedHat|CentOS/ => '/var/www/vhosts',
       /Debian|Ubuntu/ => '/var/www',
     },
     default => $apache_root
   }
 
-  $user = $operatingsystem ? {
+  $user = $::operatingsystem ? {
     /RedHat|CentOS/ => 'apache',
     /Debian|Ubuntu/ => 'www-data',
   }
 
-  $conf = $operatingsystem ? {
+  $group = $::operatingsystem ? {
+    /RedHat|CentOS/ => 'apache',
+    /Debian|Ubuntu/ => 'www-data',
+  }
+
+  $conf = $::operatingsystem ? {
     /RedHat|CentOS/ => '/etc/httpd',
     /Debian|Ubuntu/ => '/etc/apache2',
   }
 
-  $log = $operatingsystem ? {
+  $log = $::operatingsystem ? {
     /RedHat|CentOS/ => '/var/log/httpd',
     /Debian|Ubuntu/ => '/var/log/apache2',
   }
 
-  $access_log = $operatingsystem ? {
+  $access_log = $::operatingsystem ? {
     /RedHat|CentOS/ => "${log}/access_log",
     /Debian|Ubuntu/ => "${log}/access.log",
   }
 
-  $error_log = $operatingsystem ? {
+  $a2ensite = $::operatingsystem ? {
+    /RedHat|CentOS/ => '/usr/local/sbin/a2ensite',
+    /Debian|Ubuntu/ => '/usr/sbin/a2ensite',
+  }
+
+
+
+
+  $error_log = $::operatingsystem ? {
     /RedHat|CentOS/ => "${log}/error_log",
     /Debian|Ubuntu/ => "${log}/error.log",
   }
